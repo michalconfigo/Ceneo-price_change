@@ -1,0 +1,19 @@
+<div id="ceneo_options" class="panel woocommerce_options_panel">
+    <div class="options_group" style="">
+        <p class="form-field">
+            <label for="exlude_from_sync">Nigdy nie synchronizuj tego produktu</label>
+            <input value="1" type="checkbox" name="exclude_from_sync" id="exclude-from-sync"{% if exclude_from_sync  %} checked{% endif %} />
+            <span class="ceneo-help-tip">
+                <span class = "content-tip">Zaznacz by oferta z tym produktem nie została wysłana do Ceneo.</span>
+            </span>
+        </p>
+        <p class = "form-field">
+            <label class="disable_buy_now">Wyłącz opcję <b>Kup teraz</b></label>
+            <input value="1" type="checkbox" name="disable_buy_now" id="disable-buy-now"{% if disable_buy_now  %} checked{% endif %}>
+            <span class="ceneo-help-tip">
+                <span class = "content-tip">Zaznacz by oferta nie była dostępna w Ceneo w usłudze Kup Teraz.</span>
+            </span>
+        </p>
+    </div>
+    <input type="hidden" name="ceneo_metabox_nonce" value="{{ nonce }}">
+</div>

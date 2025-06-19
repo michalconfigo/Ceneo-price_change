@@ -1,0 +1,19 @@
+<script type="text/javascript">
+    _ceneo('transaction', {
+    client_email: '{{ client_email }}',
+    order_id: '{{ order_id }}',
+    work_days_to_send_questionnaire: {{ work_days_to_send_questionnaire }},
+    amount: {{ amount }},
+    shop_products: [
+    {% for product in products %}
+{
+    id: '{{ product.id }}',
+    price: {{ product.price }},
+    quantity: {{ product.quantity }},
+    currency: '{{ product.currency }}',
+}{% if not loop.last %},{% endif %}
+
+{% endfor %}
+]
+});
+</script>

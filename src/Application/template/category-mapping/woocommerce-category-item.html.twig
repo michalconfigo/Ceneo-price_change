@@ -1,0 +1,72 @@
+<ul class = "simple-accordion woocommerce-categories" style = "padding: 0 1em;">
+
+    {% for wrapped_category in wrapped_categories %}
+    <li class = "category-item">
+        <div class = "item">
+            {% if wrapped_category.children is not empty %}
+            <h4 class = "clickable">
+                <span class="material-icons-outlined chevron-right">chevron_right</span>
+                <span class="material-icons-outlined chevron-down">expand_more</span>
+                <span class = "category-name">{{ wrapped_category.woocommercecategory.name }}</span>
+            </h4>
+            {% else %}
+            <h4>
+                <span class="material-icons-outlined chevron-right hidden">chevron_right</span>
+                <span class="material-icons-outlined chevron-down hidden">expand_more</span>
+                <span class = "category-name">{{ wrapped_category.woocommercecategory.name }}</span>
+            </h4>
+            {% endif %}
+
+            {% if not wrapped_category.mappedceneocategory == null %}
+            <div class = "drop-category ui-state-assigned">
+                <h4 cat-id = "{{ wrapped_category.mappedceneocategory.id }}">
+                    {{ wrapped_category.mappedceneocategory.name }}
+                    <span class="material-icons-outlined remove">close</span>
+                </h4>
+            </div>
+            {% else %}
+                <div class = "drop-category"></div>
+            {% endif %}
+
+            {% if wrapped_category.woocommerceattributes is not empty %}
+                <a href = "#" class = "toggle-attributes">
+                    <span class = "not-toggled">Pokaż atrybuty</span>
+                    <span class = "toggled">Ukryj atrybuty</span>
+                </a>
+            {% endif %}
+            <input type="hidden" name="cat-{{ wrapped_category.woocommercecategory.term_id }}" value="{{ wrapped_category.mappedceneocategory.id }}" />
+
+            {% if wrapped_category.woocommerceattributes is not empty %}
+                <div class = "attributes">
+                    <i>Przypisz kategorię Ceneo aby zmapować atrybuty.</i>
+            {% for attribute in wrapped_category.woocommerceattributes %}
+                <p class = "attribute-row">
+                    <span class = "attribute-name">{{ attribute.name }}</span>
+                    {% if wrapped_category.mappedceneocategory == null %}
+                    <select disabled name = "attr-{{ attribute.category }}:{{ attribute.id }}">
+                        <option value = "" disabled selected>--</option>
+                    </select>
+                    {% else %}
+                    <select name = "attr-{{ attribute.category }}:{{ attribute.id }}">
+                        <option value = "" >Wybierz atrybut</option>
+                        <option value = "" disabled>--</option>
+                        {% for ceneoAttribute in wrapped_category.mappedceneocategory.keyattributes %}
+                            <option {% if wrapped_category.mappedceneoattributes[attribute.id] == ceneoAttribute %} selected {% endif %} value = "{{ ceneoAttribute }}">*{{ ceneoAttribute }}</option>
+                        {% endfor %}
+                        {% for ceneoAttribute in wrapped_category.mappedceneocategory.optionalattributes %}
+                            <option {% if wrapped_category.mappedceneoattributes[attribute.id] == ceneoAttribute %} selected {% endif %} value = "{{ ceneoAttribute }}">{{ ceneoAttribute }}</option>
+                        {% endfor %}
+                    </select>
+                    {% endif  %}
+                </p>
+            {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+        {% if wrapped_category.children is not empty %}
+            {% include "category-mapping/woocommerce-category-item.html.twig" with {'wrapped_categories': wrapped_category.children} %}
+        {% endif %}
+    </li>
+    {% endfor %}
+
+</ul>

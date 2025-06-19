@@ -1,0 +1,90 @@
+{% for notice in notices %}
+    <div class = "notice notice-{{ attribute(notice, 'type') }}">
+        <p>{{ attribute(notice, 'message') }}</p>
+    </div>
+{% endfor %}
+
+<div class = "wrap ceneo-admin-page">
+    <h1 class="custom-heading">
+        {{ page_title }}
+        <img src = "{{ logo_url }}"/>
+    </h1>
+
+    <div class = "wp-clearfix">
+        <div class = "col-1">
+            <p class = "ceneo-p-heading">
+                Mapowanie kategorii umożliwia połączenie kategorii Twojego sklepu z kategorią w Ceneo. Dzięki temu Twoje oferty pojawią się w odpowiedniej kategorii, a sam proces ich włączenia w Ceneo
+                przebiegnie szybciej.
+            </p>
+            <p class = "ceneo-p-heading">
+                Jeśli po naciśnięciu „zasugeruj mapowanie” kategoria nie została przypisana automatycznie, wystarczy, że przeciągniesz odpowiednią kategorię z tabeli „Kategorie Ceneo” (drag & drop) i umieścisz ją w okienku przy kategorii Twojego sklepu. Po zmapowaniu kategorii przypisz atrybuty swojego sklepu do tych z listy Ceneo.
+            </p>
+        </div>
+    </div>
+
+    <div class = "wp-clearfix">
+        <div class = "col-2">
+            <div class="col-wrap">
+                <div class = "card">
+                    <form method="post" action="{{ post_url }}">
+                        <div class = "card-header">
+                            <h3>Twoje kategorie</h3>
+                            <input type="button" class = "button button-secondary button-large auto-match" value = "Zasugeruj mapowanie" />
+                            <input type="submit" name="submit" value="Zapisz zmiany" class = "button button-primary button-large"/>
+                            <input type="hidden" name="action" value="assign-attributes" />
+                        </div>
+                        <div class = "card-content">
+                            <div class="form-wrap">
+                                {% include "category-mapping/woocommerce-category-item.html.twig" with {'wrapped_categories': categories} %}
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class = "col-2">
+            <div class="col-wrap">
+                <div class = "card">
+                    <div class = "card-header">
+                        <h3>Kategorie Ceneo</h3>
+                        {% if ceneo_categories is empty or is_synchronization_in_progress %}
+                        {% else %}
+                        <p class = "info">
+                            kategorie aktualne na dzień <b>{{ last_sync_time | date("d-m-Y") }}</b>.
+                        </p>
+                        <form method="post" action="{{ post_url }}">
+                            <input type = "hidden" name = "action" value="synchronize-with-ceneo" />
+                            <input type="submit" name="submit" value="Odśwież" class = "button button-primary button-large"/>
+                        </form>
+                        {% endif %}
+                    </div>
+                    <div class = "card-content">
+                            <ul class="simple-accordion ceneo-categories" style = "padding-left: 1em;">
+                                {% if is_synchronization_in_progress %}
+                                    <p>Trwa odświeżanie kategorii Ceneo.</p>
+                                {% else %}
+                                    {% if ceneo_categories is empty %}
+                                        <form method="post" action="{{ post_url }}">
+                                            <p>
+                                                Nie odświeżono kategorii Ceneo.
+                                                <input type = "hidden" name = "action" value="synchronize-with-ceneo" />
+                                                <input type="submit" name="submit" value="Odśwież" class = "button button-primary button-large"/>
+                                            </p>
+                                        </form>
+                                    {% else %}
+                                        <p>
+                                            <input id = "category-search" type = "search" name = "Seach" value = "" placeholder="Wyszukaj kategorię..." />
+                                        </p>
+                                        <hr />
+                                        {% for ceneo_category in ceneo_categories %}
+                                            {% include "category-mapping/ceneo-category-item.html.twig" with {'ceneo_category': ceneo_category} %}
+                                        {% endfor %}
+                                    {% endif %}
+                                {% endif %}
+                            </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

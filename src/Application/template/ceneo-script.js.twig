@@ -1,0 +1,10 @@
+    <script>(function(w,d,s,i,dl){w._ceneo = w._ceneo || function () {
+        w._ceneo.e = w._ceneo.e || []; w._ceneo.e.push(arguments); };
+        w._ceneo.e = w._ceneo.e || [];dl=dl===undefined?"dataLayer":dl;
+        const f = d.getElementsByTagName(s)[0], j = d.createElement(s);
+        j.defer = true;
+        j.src = "https://ssl.ceneo.pl/ct/v5/script.js?accountGuid=" + i +
+        "&t=" + Date.now() + (dl ? "&dl=" + dl : '');
+        f.parentNode.insertBefore(j, f);
+    })(window, document, "script", "{{ ceneo_guid }}");
+    </script>

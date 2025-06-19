@@ -1,0 +1,211 @@
+
+
+{% for notice in notices %}
+    <div class = "notice notice-{{ attribute(notice, 'type') }}">
+        <p>{{ attribute(notice, 'message') }}</p>
+    </div>
+{% endfor %}
+
+<div class = "wrap ceneo-admin-page">
+    <h1 class="custom-heading">
+        {{ page_title }}
+        <img src = "{{ logo_url }}"/>
+    </h1>
+
+    <div class = "wp-clearfix">
+        <div class = "col-1">
+            <p class = "ceneo-p-heading">
+                Witaj we wtyczce Ceneo.pl dzięki której szybko rozpoczniesz pozyskiwanie sprzedaży. Zanim zaczniesz, upewnij się że masz już <a target = "_blank" href = "https://formularz.ceneo.pl/">założone konto</a> sprzedawcy w Ceneo.pl i że masz dostęp do <a target = "_blank" href = "https://shops.ceneo.pl/#tag=wc">Panelu Ceneo</a>.
+            </p>
+            <p class = "ceneo-p-heading">
+                Aby wszystkie funkcje wtyczki działały poprawnie, przejdź przez
+                widoczne niżej ustawienia. Aby pobrać wymagane dane, skorzystaj z
+                linków w opisach.
+            </p>
+        </div>
+    </div>
+
+    <div class = "wp-clearfix">
+        <div class = "col-1">
+            <h4>Przesłanie ofert do Ceneo:</h4>
+            <p>
+                Aby umieścić swoje oferty w Ceneo potrzebujesz plik XML zawierający wszystkie informacje na ich temat. Nasza wtyczka stworzy ten plik za Ciebie. Zadbaj jedynie o odpowiednie
+                <a href = "{{ post_url }}?page=ceneo-category-mapping">połączenie swoich kategorii i atrybutów</a> z tymi po stronie Ceneo. Dzięki temu Twoje oferty pojawią się w Ceneo we właściwych kategoriach.
+            </p>
+        </div>
+    </div>
+
+    <div class = "wp-clearfix">
+        <div class = "col-2">
+            <div class = "col-wrap">
+                <div class = "card">
+                    <form method="post" action="{{ post_url }}">
+                        <div class = "card-header">
+                            <h3>Twój feed ofertowy XML</h3>
+                            {% if runtime_configuration.active %}
+                                <input type= "hidden" name = "action" value="stop-generate-feed" />
+                                <input type="submit" name="submit" value="Przerwij" class = "button button-cancel button-large"/>
+                            {% else %}
+                                <input type = "hidden" name = "action" value="generate-feed" />
+                                <input type="submit" name="submit" value="Odśwież" class = "button button-primary button-large"/>
+                            {% endif %}
+                        </div>
+                        <div class = "card-content">
+                            {% if runtime_configuration.active %}
+                                <p>
+                                    Trwa generowanie pliku XML...
+                                </p>
+                                <div id="progressbar" data-value="{{ (runtime_configuration.currentoffset / runtime_configuration.amountofproducts) * 100 }}"></div>
+                            {% else %}
+                                {% if last_run_time == '1970-01-01 01:00:00'  %}
+                                    <p>
+                                        Twój plik XML nie został jeszcze wygenerowany.</b>
+                                        <br />Status: <b>-</b>
+                                    </p>
+                                {% else %}
+                                    <p>
+                                        Ostatnie generowanie pliku z Twoimi ofertami <b>{{ last_run_time | date("d-m-Y G:i") }}</b>
+                                        <br />Status: <b class="success-inline">powodzenie</b>
+                                    </p>
+                                    <p>
+                                        Wygenerowano: <b>{{ current_stats.processedproducts }}</b><br />
+                                        Pominięto: <b>{{ current_stats.notprocessedproducts }}</b><br />
+                                        Wszystkich ofert: <b>{{ current_stats.allproducts }}</b>
+                                    </p>
+                                    <p>
+                                        Wklej poniższy link w Panelu Ceneo:<br />
+                                        <b>{{ fileurl }}</b>
+                                        <span class="ceneo-help-tip">
+                                            <span class = "content-tip">Jeśli nie masz jeszcze konta sprzedawcy, użyj tego linka podczas tworzenia konta w Ceneo.</span>
+                                        </span>
+                                    </p>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class = "col-2">
+            <div class = "col-wrap">
+                <div class = "card">
+                    <form method="post" action="{{ post_url }}">
+                        <div class = "card-header">
+                            <h3>Konfiguracja generatora XML</h3>
+                            <input type="submit" name="submit" value="Zapisz zmiany" class = "button button-primary button-large"/>
+                        </div>
+                        <div class = "card-content">
+                            <div class = "form-row">
+                                <label for="exclude-not-available">Wyklucz niedostępne</label>
+                                <input type = "checkbox" name = "exclude-not-available" {% if configuration.excludenotavailable %} checked {% endif %} value = "true" />
+                                <span class="ceneo-help-tip">
+                                    <span class = "content-tip">Zaznacz opcję by do Ceneo nie były wysyłane oferty niedostępne w momencie odświeżania feedu.</span>
+                                </span>
+                            </div>
+                            <div class = "form-row">
+                                <label for="merge-variants">Połącz warianty w jeden produkt</label>
+                                <input type = "checkbox" name = "merge-variants" {% if configuration.mergevariants %} checked {% endif %} value = "true" />
+                                <span class="ceneo-help-tip">
+                                    <span class = "content-tip">Zaznacz opcję aby warianty danego produktu takie jak np. rozmiar były wysyłane do Ceneo jako jeden produkt z wieloma dostępnymi rozmiarami, zamiast osobnych produktów w każdym rozmiarze. Dzięki temu orzymasz lepiej konwertujący ruch. Aby połączenie wariantów było możliwe, każdy z nich musi być w tej samej cenie.</span>
+                                </span>
+                            </div>
+                            <div class = "form-row indent">
+                                <label for="exclude-price-range-higher">Wyklucz produkty tańsze niż: </label>
+                                <input type = "text" name = "min" class = "input-number" value = "{{ attribute(configuration.pricerange, 'min') / 100 }}"{% if not configuration.excludeminprice %} disabled {% endif %}/>
+                                <input type = "checkbox" name = "exclude-min-price" {% if configuration.excludeminprice %} checked {% endif %} value = "true" />
+                                <span class="ceneo-help-tip">
+                                    <span class = "content-tip">Jeśli chcesz wysyłać do Ceneo tylko produkty powyżej pewnej ceny, wpisz ją w oknie.</span>
+                                </span>
+                            </div>
+                            <div class = "form-row">
+                                <label for="frequency">Częstotliwość generowania feed'a: </label>
+                                <select name = "frequency">
+                                    <option value = "quarterly"{% if feed_generation_frequency == "quarterly" %} selected{% endif %}>15 minut</option>
+                                    <option value = "halfly"{% if feed_generation_frequency == "halfly" %} selected{% endif %}>30 minut</option>
+                                    <option value = "hourly"{% if feed_generation_frequency == "hourly" %} selected{% endif %}>1 godzina</option>
+                                    <option value = "twohourly"{% if feed_generation_frequency == "twohourly" %} selected{% endif %}>2 godziny</option>
+                                </select>
+                            </div>
+                            <input type = "hidden" name = "action" value="update-configuration" />
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class = "wp-clearfix">
+        <div class = "col-1">
+            <h4>Uruchomienie programu Zaufane Opinie</h4>
+            <p>
+                Jeśli masz już widoczne oferty, zacznij zbierać opinie na temat swojego sklepu. Wprowadź swój kod GUID, który znajdziesz w Panelu Ceneo w <a target = "_blank" href = "https://shops.ceneo.pl/TrustedReviews/ConfigurationStepOne#tag=wc">zakładce Zaufane Opinie</a>. Usługa jest bezpłatna.
+            </p>
+        </div>
+    </div>
+
+    <div class = "wp-clearfix">
+        <div class = "col-2">
+            <div class = "col-wrap">
+                <div class = "card">
+                    <form method="post" action="{{ post_url }}">
+                        <div class = "card-header">
+                            <h3>Zaufane Opinie</h3>
+                            <input type="submit" name="submit" value="Zapisz zmiany" class = "button button-primary button-large"/>
+                        </div>
+                        <div class = "card-content">
+                            <div class = "form-row">
+                                <label for="ceneo-guid">Twój GUID z panelu Ceneo: </label>
+                                <input type = "text" name = "ceneo-guid" value = "{{ trusted_opinions_configuration.ceneoguid }}" />
+                                <span class="ceneo-help-tip">
+                                    <span class = "content-tip">Wpisz swój kod z Panelu Ceneo. Najlepiej przekopiuj go w całości by uniknąć pomyłki przy przepisywaniu.</span>
+                                </span>
+                            </div>
+                            <div class = "form-row">
+                                <label for="ceneo-guid">Czas na wystawienie opinii (dni): </label>
+                                <input type = "text" name = "questionnaire-days" value = "{{ trusted_opinions_configuration.questionnaireexpirationdays }}" />
+                                <span class="ceneo-help-tip">
+                                    <span class = "content-tip">Określ liczbę dni od złożenia zamówienia, po jakich chcesz wysłać kupującemu prośbę o wystawienie opinii. Rekomendujemy 5 dni, ale jeśli sprzedajesz produkty z dłuższym terminem wysyłki zmień liczbę dni na taką, po której klienci otrzymają już zamówienie.</span>
+                                </span>
+                            </div>
+                        </div>
+                        <input type = "hidden" name = "action" value="update-trusted-opinions" />
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class = "wp-clearfix">
+        <div class = "col-1">
+            <h4>Uruchomienie usługi Kup Teraz</h4>
+            <p>
+                Aby usługa Kup Teraz była obsługiwana przez wtyczkę, wpisz poniżej swój klucz API. Znajdziesz go w Panelu Ceneo w <a target = "_blank" href = "https://shops.ceneo.pl/WebApi/WebApiAccount#tag=wc">zakładce API</a>
+            </p>
+        </div>
+    </div>
+
+    <div class = "wp-clearfix">
+        <div class = "col-2">
+            <div class = "col-wrap">
+                <div class = "card">
+                    <form method="post" action="{{ post_url }}">
+                        <div class = "card-header">
+                            <h3>Kup Teraz</h3>
+                            <input type="submit" name="submit" value="Zapisz zmiany" class = "button button-primary button-large"/>
+                        </div>
+                        <div class = "card-content">
+                            <div class = "form-row">
+                                <label for="ceneo-guid">Twój klucz API: </label>
+                                <input type = "text" name = "ceneo-api-key" value = "{{ api_key }}" />
+                                <span class="ceneo-help-tip">
+                                    <span class = "content-tip">Klucz API jest unikalny dla Twojego sklepu i służy do autoryzacji. Nie udostępniaj go osobom postronnym.</span>
+                                </span>
+                            </div>
+                        </div>
+                        <input type = "hidden" name = "action" value="update-buy-now" />
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

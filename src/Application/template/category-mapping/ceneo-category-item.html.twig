@@ -1,0 +1,30 @@
+<li class = "category-item {{ ceneo_category.name | escape }}">
+    <div
+            class = "item draggable-category"
+            cat-name = "{{ ceneo_category.name }}"
+            cat-search = "{{ ceneo_category.name | lower }}"
+            cat-id = "{{ ceneo_category.id }}"
+            cat-optional-attributes = "{{ ceneo_category.optionalattributes | json_encode }}"
+            cat-key-attributes = "{{ ceneo_category.keyattributes | json_encode }}"
+    >
+        <span class="material-icons-outlined">more_vert</span>
+        {% if ceneo_category.children is not empty %}
+        <h4 class = "clickable">
+            <span class="material-icons-outlined chevron-right">chevron_right</span>
+            <span class="material-icons-outlined chevron-down">expand_more</span>
+            {{ ceneo_category.name }}
+        </h4>
+        {% else %}
+            <h4>
+                <span class="material-icons-outlined chevron-right hidden">chevron_right</span>
+                <span class="material-icons-outlined chevron-down hidden">expand_more</span>
+                {{ ceneo_category.name }}
+            </h4>
+        {% endif %}
+    </div>
+    {% for ceneo_category_children in ceneo_category.children %}
+        <ul class="simple-accordion ceneo-categories" style = "padding-left: 1em;">
+            {% include "category-mapping/ceneo-category-item.html.twig" with {'ceneo_category': ceneo_category_children} %}
+        </ul>
+    {% endfor %}
+</li>

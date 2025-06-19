@@ -1,0 +1,17 @@
+{
+  "type": "library",
+  "license": "proprietary",
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "name": "ceneo/ceneo-integration",
+  "description": "Ceneo Integration Plugin for Woocommerce",
+  "require": {
+    "php": ">=7.2.5",
+    "twig/twig": "^3.3"
+  },
+  "autoload": {
+    "psr-4": {
+      "Ceneo\\": "src/"
+    }
+  }
+}
